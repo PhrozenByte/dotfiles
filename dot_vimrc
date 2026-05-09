@@ -1,0 +1,12 @@
+syntax on
+filetype on
+autocmd BufNewFile,BufRead *.sh.inc set filetype=sh
+
+filetype plugin indent on
+set pastetoggle=<F12>
+
+set tabstop=4
+set shiftwidth=4
+set expandtab
+
+inoremap <S-Tab> <C-V><Tab>

@@ -1,0 +1,21 @@
+#
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# 
+# This is also sourced by our ~/.bash_profile, which is executed by bash(1) for
+# login shells, meaning that this is executed for any Bash shell in reality.
+#
+
+# if not running interactively, don't do anything
+[[ $- == *i* ]] || return
+
+# set most basic PS1
+PS1='[\u@\h \W]\$ '
+
+# include drop-in files in ~/.bashrc.d directory
+if [ -d ~/.bashrc.d ]; then
+    for __bashrc_file in ~/.bashrc.d/*; do
+        [ -f "$__bashrc_file" ] || continue
+        . "$__bashrc_file"
+    done
+    unset __bashrc_file
+fi

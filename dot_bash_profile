@@ -1,0 +1,14 @@
+#
+# ~/.bash_profile: executed by bash(1) for login shells.
+#
+
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
+
+# include ~/.bashrc if it exists and if running Bash
+[ -z "$BASH_VERSION" ] || [ ! -f ~/.bashrc ] || . ~/.bashrc
+
+# set PATH so it includes the user's private bin directories, if they exist
+[ ! -d ~/bin ] || PATH="$HOME/bin:$PATH"
+[ ! -d ~/.local/bin ] || PATH="$HOME/.local/bin:$PATH"

@@ -1,0 +1,4 @@
+{{ if not .feature_git }}
+/.gitconfig
+/.gitconfig.d/**
+{{ end }}

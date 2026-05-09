@@ -1,0 +1,5 @@
+#
+# Defaults for Chezmoi features
+#
+
+feature_git = false

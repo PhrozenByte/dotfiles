@@ -1,0 +1,4 @@
+[user]
+    name = Daniel Rudolf
+    email = archlinux.org@daniel-rudolf.de
+    signingkey = AF399DC48529A3CB

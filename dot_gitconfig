@@ -1,0 +1,91 @@
+[user]
+	name = Daniel Rudolf
+#	email = github.com@daniel-rudolf.de
+#	signingkey = D8DE4538
+[core]
+	autocrlf = input
+	pager = delta
+[credential]
+	helper = /usr/lib/git-core/git-credential-libsecret
+	useHttpPath = true
+[init]
+	defaultBranch = main
+[status]
+	submoduleSummary = true
+	showUntrackedFiles = all
+[log]
+	date = human
+	abbrevCommit = true
+	follow = true
+[diff]
+	algorithm = histogram
+#	colorMoved = default
+	mnemonicPrefix = true
+	renames = true
+	submodule = log
+	tool = meld
+[commit]
+	verbose = true
+	gpgsign = true
+[push]
+	default = simple
+	autoSetupRemote = true
+#	followTags = true
+[pull]
+	ff = true
+[merge]
+	autoStash = true
+	ff = false
+	conflictstyle = zdiff3
+	tool = meld
+[rebase]
+	autoStash = true
+	autoSquash = true
+	missingCommitsCheck = error
+	updateRefs = true
+[rerere]
+	enabled = true
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[grep]
+	break = true
+	heading = true
+	lineNumber = true
+	extendedRegexp = true
+[color]
+	ui = auto
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	line-numbers = true
+	navigate = true
+[help]
+	autocorrect = prompt
+[alias]
+	aliases = !git config --get-regexp alias | sed -re 's/alias\\.(\\S*)\\s(.*)$/\\1 = \\2/g'
+	hash = rev-parse --short HEAD --
+    last = !git --no-pager show
+    fixup = "!_() { rev=\"$(git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -d ' ' -f 1)\"; [ -n \"$rev\" ] || exit 1; git commit --fixup \"$rev\" \"$@\"; }; _"
+    amend = "!_() { rev=\"$(git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -d ' ' -f 1)\"; [ -n \"$rev\" ] || exit 1; git commit --fixup amend:\"$rev\" \"$@\"; }; _"
+    reword = "!_() { rev=\"$(git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -d ' ' -f 1)\"; [ -n \"$rev\" ] || exit 1; git commit --fixup reword:\"$rev\" \"$@\"; }; _"
+	recommit = commit --amend --no-edit
+	uncommit = reset --soft HEAD~1
+	untrack = rm --cache --
+	stash-rename = "!_() { rev=\"$(git rev-parse \"$1\")\" && git stash drop \"$1\" || exit 1 ; git stash store -m \"$2\" \"$rev\"; }; _"
+	show-side-by-side = -c delta.features=side-by-side show
+	diff-side-by-side = -c delta.features=side-by-side diff
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[includeIf "hasconfig:remote.*.url:git@gitlab.archlinux.org:*/**"]
+    path = ~/.gitconfig.d/gitlab.archlinux.org
+[includeIf "hasconfig:remote.*.url:aur@aur.archlinux.org:*"]
+    path = ~/.gitconfig.d/aur.archlinux.org
+[includeIf "hasconfig:remote.*.url:git@github.com:*/**"]
+	path = ~/.gitconfig.d/github.com
+[includeIf "hasconfig:remote.*.url:git@gist.github.com:*"]
+	path = ~/.gitconfig.d/gist.github.com

@@ -13,7 +13,7 @@ PS1='[\u@\h \W]\$ '
 
 # include drop-in files in ~/.bashrc.d directory
 if [ -d ~/.bashrc.d ]; then
-    for __bashrc_file in ~/.bashrc.d/*; do
+    for __bashrc_file in ~/.bashrc.d/*.sh; do
         [ -f "$__bashrc_file" ] || continue
         . "$__bashrc_file"
     done

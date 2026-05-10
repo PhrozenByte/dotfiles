@@ -1,0 +1,46 @@
+#!/bin/bash
+# Chezmoi hook to load GSettings and dconf values
+#
+# Script: {{ joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh" }}
+# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh") | sha256sum }}$
+{{- range .gsettings_files }}
+#
+# Data file: {{ joinPath $.chezmoi.sourceDir ".." . }}
+# $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
+{{- end }}
+
+quote() {
+    local QUOTED=
+    for ARG in "$@"; do
+        [ "$(printf '%q' "$ARG")" == "$ARG" ] \
+            && QUOTED+=" $ARG" \
+            || QUOTED+=" ${ARG@Q}"
+    done
+    echo "${QUOTED:1}"
+}
+
+echo "Running Chezmoi hook 'run_onchange_gsettings.sh' to apply GSettings and dconf config..."
+
+[ -x "$(type -p gnome-shell)" ] || { echo "Skipping Chezmoi hook: GNOME Shell is not installed" >&2; exit 0; }
+
+SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh" }}'
+[ -e "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: No such file or directory" >&2; exit 1; }
+[ -f "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: Not a file" >&2; exit 1; }
+[ -x "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: Permission denied" >&2; exit 1; }
+
+DATA_FILES=(
+{{- range .gsettings_files }}
+    '{{ joinPath $.chezmoi.sourceDir ".." . }}'
+{{- end }}
+)
+
+(( ${#DATA_FILES[@]} > 0 )) || { echo "Skipping Chezmoi hook: No data files are configured" >&2; exit 0; }
+
+for DATA_FILE in "${DATA_FILES[@]}"; do
+    [ -e "$DATA_FILE" ] || { echo "Invalid Chezmoi hook: Invalid data file ${DATA_FILE@Q}: No such file or directory" >&2; exit 1; }
+    [ -f "$DATA_FILE" ] || { echo "Invalid Chezmoi hook: Invalid data file ${DATA_FILE@Q}: Not a file" >&2; exit 1; }
+    [ -r "$DATA_FILE" ] || { echo "Invalid Chezmoi hook: Invalid data file ${DATA_FILE@Q}: Permission denied" >&2; exit 1; }
+
+    quote + "$SCRIPT" "$DATA_FILE" >&2
+    "$SCRIPT" "$DATA_FILE" ||:
+done

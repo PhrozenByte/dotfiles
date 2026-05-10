@@ -3,3 +3,9 @@
 #
 
 feature_git = false
+
+#
+# Defaults for Chezmoi data files
+#
+
+gsettings_files = [ "./data/gsettings.json" ]

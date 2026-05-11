@@ -25,8 +25,8 @@ DATA_FILES=(
     # $Hash: {{ include . | sha256sum }}$
     '{{ . }}'
 {{- else if hasPrefix "~" . }}
-    # $Hash: {{ include (joinPath $.chezmoi.homeDir .) | sha256sum }}$
-    '{{ joinPath $.chezmoi.homeDir . }}'
+    # $Hash: {{ include (joinPath $.chezmoi.homeDir (trimPrefix "~" .)) | sha256sum }}$
+    '{{ joinPath $.chezmoi.homeDir (trimPrefix "~" .) }}'
 {{- else }}
     # $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
     '{{ joinPath $.chezmoi.sourceDir ".." . }}'

@@ -1,13 +1,5 @@
 #!/bin/bash
 # Chezmoi hook to install GNOME Shell extensions
-#
-# Script: {{ joinPath .chezmoi.sourceDir ".." "scripts" "gnome-extensions.sh" }}
-# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gnome-extensions.sh") | sha256sum }}$
-{{- range .gnome_extensions_files }}
-#
-# Data file: {{ joinPath $.chezmoi.sourceDir ".." . }}
-# $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
-{{- end }}
 
 quote() {
     local QUOTED=
@@ -23,6 +15,7 @@ echo "Running Chezmoi hook 'run_onchange_gnome-extensions.sh' to install GNOME S
 
 [ -x "$(type -p gnome-shell)" ] || { echo "Skipping Chezmoi hook: GNOME Shell is not installed" >&2; exit 0; }
 
+# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gnome-extensions.sh") | sha256sum }}$
 SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gnome-extensions.sh" }}'
 [ -e "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: No such file or directory" >&2; exit 1; }
 [ -f "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: Not a file" >&2; exit 1; }
@@ -30,7 +23,16 @@ SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gnome-extensions.sh" }}'
 
 DATA_FILES=(
 {{- range .gnome_extensions_files }}
+{{- if hasPrefix "/" . }}
+    # $Hash: {{ include . | sha256sum }}$
+    '{{ . }}'
+{{- else if hasPrefix "~" . }}
+    # $Hash: {{ include (joinPath $.chezmoi.homeDir .) | sha256sum }}$
+    '{{ joinPath $.chezmoi.homeDir . }}'
+{{- else }}
+    # $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
     '{{ joinPath $.chezmoi.sourceDir ".." . }}'
+{{- end }}
 {{- end }}
 )
 

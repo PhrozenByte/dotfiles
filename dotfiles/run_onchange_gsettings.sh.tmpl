@@ -1,13 +1,5 @@
 #!/bin/bash
 # Chezmoi hook to load GSettings and dconf values
-#
-# Script: {{ joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh" }}
-# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh") | sha256sum }}$
-{{- range .gsettings_files }}
-#
-# Data file: {{ joinPath $.chezmoi.sourceDir ".." . }}
-# $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
-{{- end }}
 
 quote() {
     local QUOTED=
@@ -23,6 +15,7 @@ echo "Running Chezmoi hook 'run_onchange_gsettings.sh' to apply GSettings and dc
 
 [ -x "$(type -p gnome-shell)" ] || { echo "Skipping Chezmoi hook: GNOME Shell is not installed" >&2; exit 0; }
 
+# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh") | sha256sum }}$
 SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh" }}'
 [ -e "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: No such file or directory" >&2; exit 1; }
 [ -f "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: Not a file" >&2; exit 1; }
@@ -30,7 +23,16 @@ SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh" }}'
 
 DATA_FILES=(
 {{- range .gsettings_files }}
+{{- if hasPrefix "/" . }}
+    # $Hash: {{ include . | sha256sum }}$
+    '{{ . }}'
+{{- else if hasPrefix "~" . }}
+    # $Hash: {{ include (joinPath $.chezmoi.homeDir .) | sha256sum }}$
+    '{{ joinPath $.chezmoi.homeDir . }}'
+{{- else }}
+    # $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
     '{{ joinPath $.chezmoi.sourceDir ".." . }}'
+{{- end }}
 {{- end }}
 )
 

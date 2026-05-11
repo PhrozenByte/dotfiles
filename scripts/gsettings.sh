@@ -133,11 +133,17 @@ readarray -t HOST_SCHEMAS < <(gsettings list-schemas)
 # parse dconf
 __dconf() {
     if [ -n "$FLATPAK" ]; then
-        flatpak run --command=dconf "$FLATPAK" "$@" \
-            || { echo "\`$(quote flatpak run --command=dconf "$FLATPAK" "$@")\` failed with rc $?" >&2; return 1; }
+        if ! flatpak run --command=dconf "$FLATPAK" "$@"; then
+            echo "\`$(quote flatpak run --command=dconf "$FLATPAK" "$@")\` failed with rc $?" >&2
+            EXIT_CODE=1
+            return 1
+        fi
     else
-        dconf "$@" \
-            || { echo "\`$(quote dconf "$@")\` failed with rc $?" >&2; return 1; }
+        if ! dconf "$@"; then
+            echo "\`$(quote dconf "$@")\` failed with rc $?" >&2
+            EXIT_CODE=1
+            return 1
+        fi
     fi
 }
 
@@ -187,11 +193,17 @@ done < <(jq -c '.dconf[]?' "$CONFIG_FILE")
 # parse gsettings
 __gsettings() {
     if [ -n "$FLATPAK" ]; then
-        flatpak run --command=gsettings "$FLATPAK" "$@" \
-            || { echo "\`$(quote flatpak run --command=gsettings "$FLATPAK" "$@")\` failed with rc $?" >&2; return 1; }
+        if ! flatpak run --command=gsettings "$FLATPAK" "$@"; then
+            echo "\`$(quote flatpak run --command=gsettings "$FLATPAK" "$@")\` failed with rc $?" >&2
+            EXIT_CODE=1
+            return 1
+        fi
     else
-        gsettings "$@" \
-            || { echo "\`$(quote gsettings "$@")\` failed with rc $?" >&2; return 1; }
+        if ! gsettings "$@"; then
+            echo "\`$(quote gsettings "$@")\` failed with rc $?" >&2
+            EXIT_CODE=1
+            return 1
+        fi
     fi
 }
 

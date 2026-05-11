@@ -29,7 +29,7 @@ cmd() {
 
 __git() {
     cmd git "$@" \
-        || { echo "\`$(quote git "$@")\` failed with rc $?" >&2; return 1; }
+        || { echo "\`$(quote git "$@")\` failed with rc $?" >&2; EXIT_CODE=1; return 1; }
 }
 
 CONFIG_FILE="${1:-}"

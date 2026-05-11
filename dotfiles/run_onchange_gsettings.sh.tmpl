@@ -13,13 +13,11 @@ quote() {
 
 echo "Running Chezmoi hook 'run_onchange_gsettings.sh' to apply GSettings and dconf config..."
 
+# $GNOME Shell status: {{ if lookPath "gnome-shell" }}Installed{{ else }}Missing{{ end }}$
 [ -x "$(type -p gnome-shell)" ] || { echo "Skipping Chezmoi hook: GNOME Shell is not installed" >&2; exit 0; }
 
 # $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh") | sha256sum }}$
 SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gsettings.sh" }}'
-[ -e "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: No such file or directory" >&2; exit 1; }
-[ -f "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: Not a file" >&2; exit 1; }
-[ -x "$SCRIPT" ] || { echo "Invalid Chezmoi hook: Invalid script ${SCRIPT@Q}: Permission denied" >&2; exit 1; }
 
 DATA_FILES=(
 {{- range .gsettings_files }}
@@ -39,10 +37,6 @@ DATA_FILES=(
 (( ${#DATA_FILES[@]} > 0 )) || { echo "Skipping Chezmoi hook: No data files are configured" >&2; exit 0; }
 
 for DATA_FILE in "${DATA_FILES[@]}"; do
-    [ -e "$DATA_FILE" ] || { echo "Invalid Chezmoi hook: Invalid data file ${DATA_FILE@Q}: No such file or directory" >&2; exit 1; }
-    [ -f "$DATA_FILE" ] || { echo "Invalid Chezmoi hook: Invalid data file ${DATA_FILE@Q}: Not a file" >&2; exit 1; }
-    [ -r "$DATA_FILE" ] || { echo "Invalid Chezmoi hook: Invalid data file ${DATA_FILE@Q}: Permission denied" >&2; exit 1; }
-
     quote + "$SCRIPT" "$DATA_FILE" >&2
     "$SCRIPT" "$DATA_FILE" ||:
 done

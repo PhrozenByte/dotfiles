@@ -11,20 +11,13 @@
         { "schema": "org.gnome.desktop.session", "key": "idle-delay", "value": 300 },
 
         { "schema": "org.gnome.desktop.sound", "key": "allow-volume-above-100-percent", "value": true },
+        { "schema": "org.gnome.desktop.sound", "key": "event-sounds", "value": false },
 
         { "schema": "org.gnome.settings-daemon.plugins.color", "key": "night-light-enabled", "value": true },
         { "schema": "org.gnome.settings-daemon.plugins.color", "key": "night-light-schedule-automatic", "value": false },
         { "schema": "org.gnome.settings-daemon.plugins.color", "key": "night-light-schedule-from", "value": 19.0 },
         { "schema": "org.gnome.settings-daemon.plugins.color", "key": "night-light-schedule-to", "value": 7.0 },
         { "schema": "org.gnome.settings-daemon.plugins.color", "key": "night-light-temperature", "value": 3700 },
-
-        { "schema": "org.gnome.shell.extensions.dash-to-dock", "key": "dock-position", "value": "BOTTOM" },
-        { "schema": "org.gnome.shell.extensions.dash-to-dock", "key": "show-apps-at-top", "value": true },
-        { "schema": "org.gnome.shell.extensions.dash-to-dock", "key": "multi-monitor", "value": true },
-        { "schema": "org.gnome.shell.extensions.dash-to-dock", "key": "show-mounts", "value": false },
-        { "schema": "org.gnome.shell.extensions.dash-to-dock", "key": "show-trash", "value": false },
-
-        { "schema": "org.gnome.shell.extensions.ding", "key": "start-corner", "value": "top-left" },
 
         { "flatpak": "app.devsuite.Ptyxis", "schema": "org.gnome.Ptyxis", "key": "restore-session", "value": false },
         { "flatpak": "app.devsuite.Ptyxis", "schema": "org.gnome.Ptyxis", "key": "restore-window-size", "value": false },
@@ -59,6 +52,12 @@
         { "flatpak": "org.gnome.Calculator", "schema": "org.gnome.calculator", "key": "button-mode", "value": "advanced" },
         { "flatpak": "org.gnome.Calculator", "schema": "org.gnome.calculator", "key": "show-thousands", "value": true },
         { "flatpak": "org.gnome.Calculator", "schema": "org.gnome.calculator", "key": "favorite-currencies", "value": "['EUR', 'USD']" },
+
+        { "flatpak": "org.gnome.SimpleScan", "schema": "org.gnome.SimpleScan", "key": "text-dpi", "value": 150 },
+        { "flatpak": "org.gnome.SimpleScan", "schema": "org.gnome.SimpleScan", "key": "photo-dpi", "value": 300 },
+        { "flatpak": "org.gnome.SimpleScan", "schema": "org.gnome.SimpleScan", "key": "paper-width", "value": 2100 },
+        { "flatpak": "org.gnome.SimpleScan", "schema": "org.gnome.SimpleScan", "key": "paper-height", "value": 2970 },
+        { "flatpak": "org.gnome.SimpleScan", "schema": "org.gnome.SimpleScan", "key": "save-format", "value": "'application/pdf'" },
 
         { "flatpak": "org.gnome.meld", "schema": "org.gnome.meld", "key": "wrap-mode", "value": "word" },
         { "flatpak": "org.gnome.meld", "schema": "org.gnome.meld", "key": "indent-width", "value": 4 },

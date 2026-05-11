@@ -1,0 +1,11 @@
+{
+    "dconf": [
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/dock-position", "value": "BOTTOM" },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/show-apps-at-top", "value": true },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/multi-monitor", "value": true },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/show-mounts", "value": false },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/show-trash", "value": false },
+
+        { "path": "/org/gnome/shell/extensions/ding/start-corner", "value": "top-left" }
+    ]
+}

@@ -9,6 +9,9 @@
 {{- $gsettings_files := list -}}
 {{- if promptBoolOnce . "_" "Include default 'gsettings.json' file" true -}}
     {{- $gsettings_files = append $gsettings_files "./data/gsettings.json" -}}
+    {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "ubuntu") -}}
+        {{- $gsettings_files = append $gsettings_files "./data/gsettings_ubuntu.json" -}}
+    {{- end -}}
 {{- end -}}
 {{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gsettings.json' file" -}}
     {{- $gsettings_files = append $gsettings_files $gsettings_extra -}}

@@ -1,12 +1,7 @@
 #
-# Defaults for Chezmoi features
-#
-
-feature_git = false
-
-#
 # Defaults for Chezmoi data files
 #
 
+gitconfig_files = [ "./data/gitconfig.json" ]
 gsettings_files = [ "./data/gsettings.json" ]
 gnome_extensions_files = [ "./data/gnome-extensions.txt" ]

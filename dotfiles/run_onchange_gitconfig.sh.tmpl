@@ -1,0 +1,42 @@
+#!/bin/bash
+# Chezmoi hook to update ~/.gitconfig.d/* config files
+
+quote() {
+    local QUOTED=
+    for ARG in "$@"; do
+        [ "$(printf '%q' "$ARG")" == "$ARG" ] \
+            && QUOTED+=" $ARG" \
+            || QUOTED+=" ${ARG@Q}"
+    done
+    echo "${QUOTED:1}"
+}
+
+echo "Running Chezmoi hook 'run_onchange_gitconfig.sh' to update '~/.gitconfig.d/*' config files..."
+
+# $Git status: {{ if lookPath "git" }}Installed{{ else }}Missing{{ end }}$
+[ -x "$(type -p git)" ] || { echo "Skipping Chezmoi hook: Git is not installed" >&2; exit 0; }
+
+# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "gitconfig.sh") | sha256sum }}$
+SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "gitconfig.sh" }}'
+
+DATA_FILES=(
+{{- range .gitconfig_files }}
+{{- if hasPrefix "/" . }}
+    # $Hash: {{ include . | sha256sum }}$
+    '{{ . }}'
+{{- else if hasPrefix "~" . }}
+    # $Hash: {{ include (joinPath $.chezmoi.homeDir (trimPrefix "~" .)) | sha256sum }}$
+    '{{ joinPath $.chezmoi.homeDir (trimPrefix "~" .) }}'
+{{- else }}
+    # $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
+    '{{ joinPath $.chezmoi.sourceDir ".." . }}'
+{{- end }}
+{{- end }}
+)
+
+(( ${#DATA_FILES[@]} > 0 )) || { echo "Skipping Chezmoi hook: No data files are configured" >&2; exit 0; }
+
+for DATA_FILE in "${DATA_FILES[@]}"; do
+    quote + "$SCRIPT" "$DATA_FILE" >&2
+    "$SCRIPT" "$DATA_FILE" ||:
+done

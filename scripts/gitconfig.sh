@@ -1,0 +1,114 @@
+#!/bin/bash
+# gitconfig.sh
+# Updates ~/.gitconfig.d/* config files from a JSON file.
+#
+# Copyright (C) 2026 Daniel Rudolf (<https://www.daniel-rudolf.de>)
+# License: The MIT License <http://opensource.org/licenses/MIT>
+#
+# SPDX-License-Identifier: MIT
+
+set -eu -o pipefail
+export LC_ALL=C
+
+[ -x "$(type -p jq)" ] || { echo "Missing script dependency: jq" >&2; exit 1; }
+
+quote() {
+    local QUOTED=
+    for ARG in "$@"; do
+        [ "$(printf '%q' "$ARG")" == "$ARG" ] \
+            && QUOTED+=" $ARG" \
+            || QUOTED+=" ${ARG@Q}"
+    done
+    echo "${QUOTED:1}"
+}
+
+cmd() {
+    echo + "$(quote "$@")" >&2
+    "$@"
+}
+
+__git() {
+    cmd git "$@" \
+        || { echo "\`$(quote git "$@")\` failed with rc $?" >&2; return 1; }
+}
+
+CONFIG_FILE="${1:-}"
+if [ -z "$CONFIG_FILE" ]; then
+    echo "Usage:" >&2
+    echo "    $(basename "${BASH_SOURCE[0]}") JSON_FILE" >&2
+    exit 1
+fi
+
+[ -e "$CONFIG_FILE" ] \
+    || { echo "Invalid JSON file ${CONFIG_FILE@Q}: No such file or directory" >&2; exit 1; }
+[ -f "$CONFIG_FILE" ] \
+    || { echo "Invalid JSON file ${CONFIG_FILE@Q}: Not a file" >&2; exit 1; }
+[ -r "$CONFIG_FILE" ] \
+    || { echo "Invalid JSON file ${CONFIG_FILE@Q}: Permission denied" >&2; exit 1; }
+jq -e 'type == "object"' "$CONFIG_FILE" >/dev/null \
+    || { echo "Invalid JSON file ${CONFIG_FILE@Q}: No valid JSON file" >&2; exit 1; }
+
+EXIT_CODE=0
+
+# update user config
+# create ~/.gitconfig.d directory, if necessary
+[ ! -e ~/.gitconfig.d ] && cmd mkdir ~/.gitconfig.d \
+    || { [ -d ~/.gitconfig.d ] \
+        || { echo "Invalid '~/.gitconfig.d' directory: Not a directory" >&2; exit 1; }; }
+
+# create ~/.gitconfig.d/user file, if necessary
+[ ! -e ~/.gitconfig.d/user ] && cmd touch ~/.gitconfig.d/user \
+    || { [ -f ~/.gitconfig.d/user ] \
+        || { echo "Invalid '~/.gitconfig.d/user' file: Not a file" >&2; exit 1; }; }
+
+# write Git config values to ~/.gitconfig.d/user
+while IFS=$'\t' read -r KEY VALUE; do
+    __git config set --file ~/.gitconfig.d/user \
+        "$KEY" "$VALUE"
+done < <(jq -r '.config | paths(scalars) as $p | [($p | join(".")), (getpath($p))] | @tsv' "$CONFIG_FILE")
+
+# update remotes
+__invalid_remote() {
+    echo "Invalid remote config #$((INDEX-1)) in ${CONFIG_FILE@Q}:" "$@" >&2
+    EXIT_CODE=1
+}
+
+# create ~/.gitconfig.d/remotes file, if necessary
+[ ! -e ~/.gitconfig.d/remotes ] && cmd touch ~/.gitconfig.d/remotes \
+    || { [ -f ~/.gitconfig.d/remotes ] \
+        || { echo "Invalid '~/.gitconfig.d/remotes' file: Not a file" >&2; exit 1; }; }
+
+if jq -e '.remotes | length > 0' "$CONFIG_FILE" &>/dev/null; then
+    # create ~/.gitconfig.d/remotes.d directory, if necessary
+    [ ! -e ~/.gitconfig.d/remotes.d ] && cmd mkdir ~/.gitconfig.d/remotes.d \
+        || { [ -d ~/.gitconfig.d/remotes.d ] \
+            || { echo "Invalid '~/.gitconfig.d/remotes.d' directory: Not a directory" >&2; exit 1; }; }
+
+    INDEX=0
+    while IFS= read -u3 -r ENTRY; do
+        ((++INDEX))
+
+        # get filename within ~/.gitconfig.d/remotes.d directory
+        FILENAME="$(jq -r '.includeFile // empty' <<<"$ENTRY")"
+        [[ "$FILENAME" =~ ^[^/]+$ ]] || { __invalid_remote "Invalid filename given"; continue; }
+
+        # read remote URL pattern
+        readarray -t URL_PATTERNS < <(jq -r '.remoteUrlPattern[]?' <<<"$ENTRY")
+        (( ${#URL_PATTERNS[@]} > 0 )) || { __invalid_remote "No remote URL pattern given"; continue; }
+
+        # write includeIf declarations matching the given remote URL pattern to ~/.gitconfig.d/remotes
+        for URL_PATTERN in "${URL_PATTERNS[@]}"; do
+            __git config set --file ~/.gitconfig.d/remotes \
+                includeIf."hasconfig:remote.*.url:$URL_PATTERN".path "~/.gitconfig.d/remotes.d/$FILENAME"
+        done
+
+        # write Git config to the remote's config file below ~/.gitconfig.d/remotes
+        # `git config set --file` will create the file if it doesn't exist yet
+        while IFS=$'\t' read -u4 -r KEY VALUE; do
+            __git config set --file ~/.gitconfig.d/remotes.d/"$FILENAME" \
+                "$KEY" "$VALUE"
+        done 4< <(jq -r '.config | paths(scalars) as $p | [($p | join(".")), (getpath($p))] | @tsv' <<<"$ENTRY")
+    done 3< <(jq -c '.remotes[]' "$CONFIG_FILE")
+fi
+
+exit $EXIT_CODE

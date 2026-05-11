@@ -1,4 +1,3 @@
-{{ if not .feature_git }}
+{{ if not (lookPath "git") }}
 /.gitconfig
-/.gitconfig.d/**
 {{ end }}

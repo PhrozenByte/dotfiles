@@ -1,3 +1,6 @@
 {{ if not (lookPath "git") }}
 /.gitconfig
 {{ end }}
+{{ if not (lookPath "vim") }}
+/.vimrc
+{{ end }}

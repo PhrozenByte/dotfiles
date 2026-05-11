@@ -2,6 +2,6 @@
 # Defaults for Chezmoi data files
 #
 
-gitconfig_files = [ "./data/gitconfig.json" ]
-gsettings_files = [ "./data/gsettings.json" ]
-gnome_extensions_files = [ "./data/gnome-extensions.txt" ]
+gitconfig_files = []
+gsettings_files = []
+gnome_extensions_files = []

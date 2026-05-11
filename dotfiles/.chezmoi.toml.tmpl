@@ -1,0 +1,28 @@
+{{- $gitconfig_files := list -}}
+{{- if promptBoolOnce . "_" "Include default 'gitconfig.json' file" true -}}
+    {{- $gitconfig_files = append $gitconfig_files "./data/gitconfig.json" -}}
+{{- end -}}
+{{- if $gitconfig_extra := promptStringOnce . "_" "Include additional 'gitconfig.json' file" -}}
+    {{- $gitconfig_files = append $gitconfig_files $gitconfig_extra -}}
+{{- end -}}
+
+{{- $gsettings_files := list -}}
+{{- if promptBoolOnce . "_" "Include default 'gsettings.json' file" true -}}
+    {{- $gsettings_files = append $gsettings_files "./data/gsettings.json" -}}
+{{- end -}}
+{{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gsettings.json' file" -}}
+    {{- $gsettings_files = append $gsettings_files $gsettings_extra -}}
+{{- end -}}
+
+{{- $gnome_extensions_files := list -}}
+{{- if promptBoolOnce . "_" "Include default 'gnome-extensions.txt' file" true -}}
+    {{- $gnome_extensions_files = append $gnome_extensions_files "./data/gnome-extensions.txt" -}}
+{{- end -}}
+{{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gnome-extensions.txt' file" -}}
+    {{- $gnome_extensions_files = append $gnome_extensions_files $gsettings_extra -}}
+{{- end -}}
+
+[data]
+gitconfig_files = [ {{ $gitconfig_files | quoteList | join ", " }} ]
+gsettings_files = [ {{ $gsettings_files | quoteList | join ", " }} ]
+gnome_extensions_files = [ {{ $gnome_extensions_files | quoteList | join ", " }} ]

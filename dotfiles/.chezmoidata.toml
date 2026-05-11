@@ -9,3 +9,4 @@ feature_git = false
 #
 
 gsettings_files = [ "./data/gsettings.json" ]
+gnome_extensions_files = [ "./data/gnome-extensions.txt" ]

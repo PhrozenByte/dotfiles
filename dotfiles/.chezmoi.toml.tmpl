@@ -21,8 +21,8 @@
 {{- if promptBoolOnce . "_" "Include default 'gnome-extensions.txt' file" true -}}
     {{- $gnome_extensions_files = append $gnome_extensions_files "./data/gnome-extensions.txt" -}}
 {{- end -}}
-{{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gnome-extensions.txt' file" -}}
-    {{- $gnome_extensions_files = append $gnome_extensions_files $gsettings_extra -}}
+{{- if $gnome_extensions_extra := promptStringOnce . "_" "Include additional 'gnome-extensions.txt' file" -}}
+    {{- $gnome_extensions_files = append $gnome_extensions_files $gnome_extensions_extra -}}
 {{- end -}}
 
 [data]

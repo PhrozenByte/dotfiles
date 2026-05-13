@@ -1,28 +1,40 @@
 {{- $gitconfig_files := list -}}
-{{- if promptBoolOnce . "_" "Include default 'gitconfig.json' file" true -}}
-    {{- $gitconfig_files = append $gitconfig_files "./data/gitconfig.json" -}}
-{{- end -}}
-{{- if $gitconfig_extra := promptStringOnce . "_" "Include additional 'gitconfig.json' file" -}}
-    {{- $gitconfig_files = append $gitconfig_files $gitconfig_extra -}}
+{{- if hasKey . "gitconfig_files" -}}
+    {{- $gitconfig_files = .gitconfig_files -}}
+{{- else -}}
+    {{- if promptBoolOnce . "_" "Include default 'gitconfig.json' file" true -}}
+        {{- $gitconfig_files = append $gitconfig_files "./data/gitconfig.json" -}}
+    {{- end -}}
+    {{- if $gitconfig_extra := promptStringOnce . "_" "Include additional 'gitconfig.json' file" -}}
+        {{- $gitconfig_files = append $gitconfig_files $gitconfig_extra -}}
+    {{- end -}}
 {{- end -}}
 
 {{- $gsettings_files := list -}}
-{{- if promptBoolOnce . "_" "Include default 'gsettings.json' file" true -}}
-    {{- $gsettings_files = append $gsettings_files "./data/gsettings.json" -}}
-    {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "ubuntu") -}}
-        {{- $gsettings_files = append $gsettings_files "./data/gsettings_ubuntu.json" -}}
+{{- if hasKey . "gsettings_files" -}}
+    {{- $gsettings_files = .gsettings_files -}}
+{{- else -}}
+    {{- if promptBoolOnce . "_" "Include default 'gsettings.json' file" true -}}
+        {{- $gsettings_files = append $gsettings_files "./data/gsettings.json" -}}
+        {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "ubuntu") -}}
+            {{- $gsettings_files = append $gsettings_files "./data/gsettings_ubuntu.json" -}}
+        {{- end -}}
     {{- end -}}
-{{- end -}}
-{{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gsettings.json' file" -}}
-    {{- $gsettings_files = append $gsettings_files $gsettings_extra -}}
+    {{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gsettings.json' file" -}}
+        {{- $gsettings_files = append $gsettings_files $gsettings_extra -}}
+    {{- end -}}
 {{- end -}}
 
 {{- $gnome_extensions_files := list -}}
-{{- if promptBoolOnce . "_" "Include default 'gnome-extensions.txt' file" true -}}
-    {{- $gnome_extensions_files = append $gnome_extensions_files "./data/gnome-extensions.txt" -}}
-{{- end -}}
-{{- if $gnome_extensions_extra := promptStringOnce . "_" "Include additional 'gnome-extensions.txt' file" -}}
-    {{- $gnome_extensions_files = append $gnome_extensions_files $gnome_extensions_extra -}}
+{{- if hasKey . "gnome_extensions_files" -}}
+    {{- $gnome_extensions_files = .gnome_extensions_files -}}
+{{- else -}}
+    {{- if promptBoolOnce . "_" "Include default 'gnome-extensions.txt' file" true -}}
+        {{- $gnome_extensions_files = append $gnome_extensions_files "./data/gnome-extensions.txt" -}}
+    {{- end -}}
+    {{- if $gnome_extensions_extra := promptStringOnce . "_" "Include additional 'gnome-extensions.txt' file" -}}
+        {{- $gnome_extensions_files = append $gnome_extensions_files $gnome_extensions_extra -}}
+    {{- end -}}
 {{- end -}}
 
 [data]

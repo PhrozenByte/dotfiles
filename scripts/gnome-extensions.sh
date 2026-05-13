@@ -31,10 +31,11 @@
 # SPDX-License-Identifier: MIT
 
 set -eu -o pipefail
-export LC_ALL=C
+export LC_ALL=C.UTF-8
 
 [ -x "$(type -p jq)" ] || { echo "Missing script dependency: jq" >&2; exit 1; }
 [ -x "$(type -p sed)" ] || { echo "Missing script dependency: sed" >&2; exit 1; }
+[ -x "$(type -p grep)" ] || { echo "Missing script dependency: grep" >&2; exit 1; }
 [ -x "$(type -p curl)" ] || { echo "Missing script dependency: curl" >&2; exit 1; }
 [ -x "$(type -p gnome-shell)" ] || { echo "Missing script dependency: gnome-shell" >&2; exit 1; }
 [ -x "$(type -p gnome-extensions)" ] || { echo "Missing script dependency: gnome-extensions" >&2; exit 1; }
@@ -59,6 +60,16 @@ urlencode() {
     printf '%s\n' "$@" | jq -R '@uri' | jq -rs --arg sep "$SEP" 'join($sep)'
 }
 
+# print usage
+if (( $# == 0 )); then
+    echo "Usage:" >&2
+    echo "    $(basename "${BASH_SOURCE[0]}") [EXTENSION_UUID]..." >&2
+    exit 1
+fi
+
+# prepare script
+EXIT_CODE=0
+
 __curl_json() {
     local RESPONSE RETURN_CODE
     RESPONSE="$(curl -sSf -L -H "Accept: application/json" "$@")"
@@ -75,16 +86,6 @@ __curl_json() {
     printf '%s\n' "$RESPONSE"
     return $RETURN_CODE
 }
-
-# check script arguments
-if (( $# == 0 )); then
-    echo "Usage:" >&2
-    echo "    $(basename "${BASH_SOURCE[0]}") [EXTENSION_UUID]..." >&2
-    exit 1
-fi
-
-# install GNOME Shell extensions from extensions.gnome.org
-EXIT_CODE=0
 
 __latest_version() {
     local EXTENSION="$1"

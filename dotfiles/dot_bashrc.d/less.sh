@@ -7,7 +7,7 @@ if [ -x "$(type -p less)" ]; then
         export LESSOPEN="| $(type -p src-hilite-lesspipe.sh) %s"
     fi
 
-    # quit if contents fit into one screen (-F), and enable raw ANSI colors (-R)
+    # quit if contents fit into one screen (-F), enable raw ANSI colors (-R), and use a more verbose prompt (-M)
     # different from typical defaults, don't restore the last shown screen (no -X)
-    export LESS='-FR'
+    export LESS='-FRM'
 fi

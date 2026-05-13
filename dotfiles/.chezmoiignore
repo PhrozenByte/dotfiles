@@ -3,4 +3,5 @@
 {{ end }}
 {{ if not (lookPath "vim") }}
 /.vimrc
+/.vim/
 {{ end }}

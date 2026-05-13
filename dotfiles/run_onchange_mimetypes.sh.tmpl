@@ -1,0 +1,42 @@
+#!/bin/bash
+# Chezmoi hook to load default applications for MIME types
+
+quote() {
+    local QUOTED=
+    for ARG in "$@"; do
+        [ "$(printf '%q' "$ARG")" == "$ARG" ] \
+            && QUOTED+=" $ARG" \
+            || QUOTED+=" ${ARG@Q}"
+    done
+    echo "${QUOTED:1}"
+}
+
+echo "Running Chezmoi hook 'run_onchange_mimetypes.sh' to load default applications for MIME types..."
+
+# $XDG utils status: {{ if lookPath "xdg-mime" }}Installed{{ else }}Missing{{ end }}$
+[ -x "$(type -p xdg-mime)" ] || { echo "Skipping Chezmoi hook: XDG Utils are not installed" >&2; exit 0; }
+
+# $Hash: {{ include (joinPath .chezmoi.sourceDir ".." "scripts" "mimetypes.sh") | sha256sum }}$
+SCRIPT='{{ joinPath .chezmoi.sourceDir ".." "scripts" "mimetypes.sh" }}'
+
+DATA_FILES=(
+{{- range .mimetypes_files }}
+{{- if hasPrefix "/" . }}
+    # $Hash: {{ include . | sha256sum }}$
+    '{{ . }}'
+{{- else if hasPrefix "~" . }}
+    # $Hash: {{ include (joinPath $.chezmoi.homeDir (trimPrefix "~" .)) | sha256sum }}$
+    '{{ joinPath $.chezmoi.homeDir (trimPrefix "~" .) }}'
+{{- else }}
+    # $Hash: {{ include (joinPath $.chezmoi.sourceDir ".." .) | sha256sum }}$
+    '{{ joinPath $.chezmoi.sourceDir ".." . }}'
+{{- end }}
+{{- end }}
+)
+
+(( ${#DATA_FILES[@]} > 0 )) || { echo "Skipping Chezmoi hook: No data files are configured" >&2; exit 0; }
+
+for DATA_FILE in "${DATA_FILES[@]}"; do
+    quote + "$SCRIPT" "$DATA_FILE" >&2
+    "$SCRIPT" "$DATA_FILE" ||:
+done

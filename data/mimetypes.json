@@ -1,0 +1,40 @@
+{
+    "mimes": {
+        "text/html": [ "org.mozilla.firefox", "firefox", "org.chromium.Chromium", "chromium" ],
+        "application/xhtml+xml": [ "org.mozilla.firefox", "firefox", "org.chromium.Chromium", "chromium" ],
+        "application/rdf+xml":  [ "org.mozilla.firefox", "firefox", "org.chromium.Chromium", "chromium" ],
+        "application/rss+xml":  [ "org.mozilla.firefox", "firefox", "org.chromium.Chromium", "chromium" ],
+
+        "application/msword": [ "word", "office-word", "org.libreoffice.LibreOffice.writer", "libreoffice-writer" ],
+        "application/msword-template": [ "word", "office-word", "org.libreoffice.LibreOffice.writer", "libreoffice-writer" ],
+        "application/vnd.ms-word*": [ "word", "office-word", "org.libreoffice.LibreOffice.writer", "libreoffice-writer" ],
+        "application/vnd.openxmlformats-officedocument.wordprocessing*": [ "word", "office-word", "org.libreoffice.LibreOffice.writer", "libreoffice-writer" ],
+
+        "application/vnd.ms-excel*": [ "excel", "office-excel", "org.libreoffice.LibreOffice.calc", "libreoffice-calc" ],
+        "application/vnd.openxmlformats-officedocument.spreadsheet*": [ "excel", "office-excel", "org.libreoffice.LibreOffice.calc", "libreoffice-calc" ],
+
+        "application/vnd.ms-powerpoint*": [ "powerpoint", "office-powerpoint", "org.libreoffice.LibreOffice.impress", "libreoffice-impress" ],
+        "application/vnd.openxmlformats-officedocument.presentation*": [ "powerpoint", "office-powerpoint", "org.libreoffice.LibreOffice.impress", "libreoffice-impress" ],
+
+        "application/vnd.visio": [ "visio", "office-visio", "org.libreoffice.LibreOffice.draw", "libreoffice-draw" ],
+        "application/vnd.ms-visio.*": [ "visio", "office-visio", "org.libreoffice.LibreOffice.draw", "libreoffice-draw" ],
+
+        "application/vnd.ms-access": [ "access", "office-access", "org.libreoffice.LibreOffice.base", "libreoffice-base" ]
+    },
+    "apps": {
+        "org.gnome.TextEditor": [
+            "text/plain",
+            "text/csv",
+            "text/tab-separated-values",
+            "application/json",
+            "application/xml"
+        ],
+        "gnome-disk-image-mounter": [ "*/*" ],
+        "org.gnome.FileRoller": [ "*/*" ],
+        "org.gnome.Loupe": [ "*/*" ],
+        "org.gnome.Papers": [ "*/*" ],
+        "org.inkscape.Inkscape": [ "*/*" ],
+        "org.videolan.VLC-*": [ "*/*" ],
+        "org.videolan.VLC": [ "*/*" ]
+    }
+}

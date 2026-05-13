@@ -37,7 +37,20 @@
     {{- end -}}
 {{- end -}}
 
+{{- $mimetypes_files := list -}}
+{{- if hasKey . "mimetypes_files" -}}
+    {{- $mimetypes_files = .mimetypes_files -}}
+{{- else -}}
+    {{- if promptBoolOnce . "_" "Include default 'mimetypes.json' file" true -}}
+        {{- $mimetypes_files = append $mimetypes_files "./data/mimetypes.json" -}}
+    {{- end -}}
+    {{- if $mimetypes_extra := promptStringOnce . "_" "Include additional 'mimetypes.json' file" -}}
+        {{- $mimetypes_files = append $mimetypes_files $mimetypes_extra -}}
+    {{- end -}}
+{{- end -}}
+
 [data]
 gitconfig_files = [ {{ $gitconfig_files | quoteList | join ", " }} ]
 gsettings_files = [ {{ $gsettings_files | quoteList | join ", " }} ]
 gnome_extensions_files = [ {{ $gnome_extensions_files | quoteList | join ", " }} ]
+mimetypes_files = [ {{ $mimetypes_files | quoteList | join ", " }} ]

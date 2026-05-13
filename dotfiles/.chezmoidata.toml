@@ -5,3 +5,4 @@
 gitconfig_files = []
 gsettings_files = []
 gnome_extensions_files = []
+mimetypes_files = []

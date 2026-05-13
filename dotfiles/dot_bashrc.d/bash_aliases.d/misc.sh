@@ -32,3 +32,20 @@ if [ -x "$(type -p iostat)" ]; then
         watch -n0 -- "$(quote "${IOSTAT[@]}") | $(quote "${AWK[@]}")"
     }
 fi
+
+# print block device to ATA port mappings
+blkata() {
+    (( $# > 0 )) || set -- /sys/block/sd?
+
+    local DEVICE= HOST= TARGET= ATA2= ATA=
+    for DEVICE in "$@"; do
+        DEVICE="$(basename "$DEVICE")"
+        [ -e "/sys/block/$DEVICE" ] || { echo "Invalid device: $DEVICE" >&2; continue; }
+
+        HOST="$(ls -l "/sys/block/$DEVICE" | grep -Eo 'host[0-9]+')"
+        TARGET="$(ls -l "/sys/block/$DEVICE" | grep -Eo 'target[0-9:]*')"
+        ATA2="$(echo "$TARGET" | grep -Eo '[0-9]:[0-9]$' | sed 's/://')"
+        ATA="$(cat "/sys/class/scsi_host/$HOST/unique_id")"
+        echo "$DEVICE -> ata$ATA.$ATA2"
+    done
+}

@@ -1,5 +1,7 @@
-[ -n "$(type -t vim)" ] \
-        || alias vim='vi'
+[ -n "$(type -t vi)" ] || [ -z "$(type -t vim)" ] \
+    || alias vi='vim'
+[ -n "$(type -t vim)" ] || [ -z "$(type -t vi)" ] \
+    || alias vim='vi'
 
 [ ! -x "$(type -p ssh)" ] \
     || alias ssh-once='ssh -o "UserKnownHostsFile=/dev/null"'

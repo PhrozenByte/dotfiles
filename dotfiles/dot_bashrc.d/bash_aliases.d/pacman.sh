@@ -26,6 +26,14 @@ if [ -x "$(type -p yay)" ]; then
     alias yay-mark-manual='yay -D --asexplicit'
     alias yay-newconfigs='sudo find /etc -name "*.pacnew"'
 
+    yay-newconfigs-diff() {
+        local FILE
+        sudo find /etc -name "*.pacnew" -print0 \
+            | while IFS= read -d '' -r FILE; do
+                diff -u "${FILE:0:-7}" "$FILE"
+            done
+    }
+
     yay-report() {
         sudo pacreport --missing-files --unowned-files
         #sudo pacreport --backups --missing-files --unowned-files

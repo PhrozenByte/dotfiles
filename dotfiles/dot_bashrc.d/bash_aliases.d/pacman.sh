@@ -5,7 +5,7 @@
 # yay aliases
 if [ -x "$(type -p yay)" ]; then
     alias yay-install='yay -S --repo --needed'
-    alias yay-reinstall='yay -S --repo --redownloadall --rebuildtree --answerclean All'
+    alias yay-reinstall='yay -S --repo --redownloadall --rebuild --rebuildtree --answerclean All'
     #alias yay-update='yay -Sy'
     alias yay-upgrade='yay -Syu'
     alias yay-remove='yay -Rs'
@@ -35,8 +35,7 @@ if [ -x "$(type -p yay)" ]; then
     }
 
     yay-report() {
-        sudo pacreport --missing-files --unowned-files
-        #sudo pacreport --backups --missing-files --unowned-files
+        sudo pacreport --backups --missing-files --unowned-files
 
         echo "Modified Package Files:"
         { sudo paccheck --quiet --files --file-properties --sha256sum \

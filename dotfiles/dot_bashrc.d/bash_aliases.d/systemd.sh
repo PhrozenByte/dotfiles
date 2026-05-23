@@ -1,5 +1,5 @@
-# systemd aliases
 if [ -x "$(type -p systemctl)" ]; then
+    # disable systemctl's pager by default
     alias systemctl='systemctl --no-pager'
 
     # quit if contents fit into one screen (-F), enable raw ANSI colors (-R), and use a more verbose prompt (-M)
@@ -9,6 +9,6 @@ if [ -x "$(type -p systemctl)" ]; then
 fi
 
 [ ! -x "$(type -p journalctl)" ] \
-    || alias journalctl='journalctl --pager-end --lines all'
+    || alias journalctl='journalctl --boot --lines all'
 [ ! -x "$(type -p run0)" ] \
     || alias run0='run0 --shell-prompt-prefix= --background='

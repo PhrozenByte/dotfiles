@@ -16,3 +16,7 @@ alias ..6='cd ../../../../../..'
 alias ..7='cd ../../../../../../..'
 alias ..8='cd ../../../../../../../..'
 alias ..9='cd ../../../../../../../../..'
+
+# pushd/popd aliases
+alias -- +='pushd'
+alias -- -='popd'

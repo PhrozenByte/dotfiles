@@ -26,6 +26,10 @@ alias sha256sum-c='sha256sum --quiet --check'
 alias sha384sum-c='sha384sum --quiet --check'
 alias sha512sum-c='sha512sum --quiet --check'
 
+# use bat as drop-in replacement of cat
+[ ! -x "$(type -p bat)" ] \
+    || alias cat='bat --paging=never'
+
 # misc coreutils aliases
 alias du='du --max-depth=1 -h'
 alias df='df --sync --print-type --exclude-type overlay --exclude-type squashfs --exclude-type fuse.unionfs --exclude-type fuse.unionfs-fuse --exclude-type fuse.bindfs --exclude-type tmpfs --exclude-type devtmpfs --exclude-type efivarfs -h'

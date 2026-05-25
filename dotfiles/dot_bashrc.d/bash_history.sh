@@ -1,13 +1,16 @@
 # append to the history file, don't overwrite it
 shopt -s histappend
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
+# immediately append to the history file, don't wait until the terminal is closed
+# optionally add `history -n` to enable live syncing accross all open terminals
+export PROMPT_COMMAND=( 'history -a' "${PROMPT_COMMAND[@]}" )
+
+# don't put duplicate lines and lines starting with spaces in the history
+export HISTCONTROL=ignoreboth
 
 # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
+export HISTSIZE=10000
+export HISTFILESIZE=20000
 
 # disable csh-style history expansion
 set +o histexpand

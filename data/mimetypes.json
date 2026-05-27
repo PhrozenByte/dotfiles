@@ -35,6 +35,8 @@
         "org.gnome.Papers": [ "*/*" ],
         "org.inkscape.Inkscape": [ "*/*" ],
         "org.videolan.VLC-*": [ "*/*" ],
-        "org.videolan.VLC": [ "*/*" ]
+        "org.videolan.VLC": [ "*/*" ],
+        "org.mozilla.thunderbird": [ "*/*" ],
+        "org.mozilla.thunderbird_esr": [ "*/*" ]
     }
 }

@@ -51,29 +51,41 @@ __ps1() {
     if [ $LEN -le $MAX ]; then
         echo -n "$LINE_H[$COLOR_B_BLUE\w$COLOR_CLEAR]"
     else
-      local LEN_FIRST=$((MAX / 3))
-      local LEN_LAST=$((MAX - LEN_FIRST - 1))
-      echo -n "$LINE_H[$COLOR_B_BLUE"
-      echo -n "$(echo -n "\w" | head -c $LEN_FIRST)\342\200\246$(echo -n "\w" | tail -c $LEN_LAST)"
-      echo -n "$COLOR_CLEAR]"
+        local LEN_FIRST=$((MAX / 3))
+        local LEN_LAST=$((MAX - LEN_FIRST - 1))
+        echo -n "$LINE_H[$COLOR_B_BLUE"
+        echo -n "$(echo -n "\w" | head -c $LEN_FIRST)\342\200\246$(echo -n "\w" | tail -c $LEN_LAST)"
+        echo -n "$COLOR_CLEAR]"
     fi
 
     # second line of PS1
     echo
 
     # print user and host
-    if [ -z "${FLATPAK_ID:-}" ]; then
+    if [ -z "${FLATPAK_ID:-}" ] && [ -z "${VIRTUAL_ENV:-}" ]; then
         echo -n "$LINE_TR$LINE_H$LINE_H$LINE_H[\u@\h]"
     else
+        # not the last line when in a Flatpak container and/or Python virtualenv
         echo -n "$LINE_VR$LINE_H$LINE_H$LINE_H[\u@\h]"
-
-        # third line if in Flatpak container
-        echo
     fi
 
     # print current Flatpak container
     if [ -n "${FLATPAK_ID:-}" ]; then
-        echo -n "$LINE_TR$LINE_H$LINE_H$LINE_H$LINE_H$LINE_H[📦 $FLATPAK_ID]"
+        echo -n "$LINE_H[📦 $FLATPAK_ID]"
+    fi
+
+    # print current Python virtualenv
+    if [ -n "${VIRTUAL_ENV:-}" ]; then
+        local VIRTUAL_ENV_NAME="$(basename "$VIRTUAL_ENV")"
+        [[ ! "$VIRTUAL_ENV_NAME" =~ ^\.?v(irtual)?env$ ]] \
+            || VIRTUAL_ENV_NAME="$(basename "$(dirname "$VIRTUAL_ENV")")"
+        echo -n "$LINE_H[🐍 $VIRTUAL_ENV_NAME]"
+    fi
+
+    # third line when in a Flatpak container and/or Python virtualenv
+    if [ -n "${FLATPAK_ID:-}" ] || [ -n "${VIRTUAL_ENV:-}" ]; then
+        echo
+        echo -n "$LINE_TR$LINE_H$LINE_H$LINE_H$LINE_H"
     fi
 
     # print current Git branch

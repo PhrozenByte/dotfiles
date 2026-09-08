@@ -25,6 +25,7 @@ if [ -x "$(type -p yay)" ]; then
     alias yay-mark-auto='yay -D --asdeps'
     alias yay-mark-manual='yay -D --asexplicit'
     alias yay-newconfigs='sudo find /etc -name "*.pacnew"'
+    alias yay-why='pactree -r'
 
     yay-newconfigs-diff() {
         local FILE

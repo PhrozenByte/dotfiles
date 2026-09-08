@@ -58,7 +58,7 @@ if [ -x "$(type -p borg)" ]; then
     # list known repos
     borg-list-repos() {
         __read_inifile() {
-            awk -F= -v section="$1" -v field="$2" '
+            \awk -F= -v section="$1" -v field="$2" '
                 { for (i = 1; i <= NF; i++) { gsub(/^[ \t\r\n]+|[ \t\r\n]+$/, "", $i) } }
                 /^\[.+\]/ { found=0 }
                 $0 ~ "^\\[(" section ")\\]" { found=1 }
@@ -68,36 +68,50 @@ if [ -x "$(type -p borg)" ]; then
 
         local REPO_ID REPO_LAST_LOCATION REPO_LAST_USAGE
         local CACHE_SIZE CACHE_LOCATION CACHE_TIMESTAMP
-        local RC=0
+        local BORG_DIR RC=0
 
         if [ -n "${BORG_BASE_DIR:-}" ]; then
             [ -n "${BORG_CACHE_DIR:-}" ] || local BORG_CACHE_DIR="$BORG_BASE_DIR/.cache/borg"
             [ -n "${BORG_CONFIG_DIR:-}" ] || local BORG_CONFIG_DIR="$BORG_BASE_DIR/.config/borg"
+            [ -n "${BORG_DATA_DIR:-}" ] || local BORG_DATA_DIR="$BORG_BASE_DIR/.local/share/borg"
         else
             [ -n "${BORG_CACHE_DIR:-}" ] || local BORG_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/borg"
             [ -n "${BORG_CONFIG_DIR:-}" ] || local BORG_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/borg"
+            [ -n "${BORG_DATA_DIR:-}" ] || local BORG_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/borg"
         fi
-        [ -n "${BORG_SECURITY_DIR:-}" ] || local BORG_SECURITY_DIR="$BORG_CONFIG_DIR/security"
+        [ -n "${BORG_SECURITY_DIR:-}" ] || local BORG_SECURITY_DIR="$BORG_DATA_DIR/security:$BORG_CONFIG_DIR/security"
         [ -n "${BORG_KEYS_DIR:-}" ] || local BORG_KEYS_DIR="$BORG_CONFIG_DIR/keys"
 
-        for REPO_ID in "$BORG_CACHE_DIR/"*"/"; do
-            [ "$REPO_ID" != "$BORG_CACHE_DIR/*/" ] || break
-            REPO_ID="$(basename "$REPO_ID")"
+        local -A BORG_REPO_SECURITY=()
+        while read -r -d: BORG_DIR; do
+            if [ -d "$BORG_DIR" ] && [ -n "$(find "$BORG_DIR" -maxdepth 0 -not -empty)" ]; then
+                for REPO_ID in "$BORG_DIR"/*/; do
+                    REPO_ID="$(basename "$REPO_ID")"
 
-            if [ ! -d "$BORG_SECURITY_DIR/$REPO_ID" ]; then
-                echo "Borg cache but no security info for Borg repo ${REPO_ID@Q} found" >&2
-                RC=1
+                    [ -z "${BORG_REPO_SECURITY[$REPO_ID]:-}" ] \
+                        || { echo "Inconsistent security dir of Borg repo ${REPO_ID@Q}: Duplicate directories" \
+                            "at $BORG_DIR and $(dirname "${BORG_REPO_SECURITY[$REPO_ID]}")" >&2; RC=1; }
+                    BORG_REPO_SECURITY[$REPO_ID]="$BORG_DIR/$REPO_ID"
+                done
             fi
-        done
+        done <<<"$BORG_SECURITY_DIR:"
 
-        for REPO_ID in "$BORG_SECURITY_DIR/"*"/"; do
-            [ "$REPO_ID" != "$BORG_SECURITY_DIR/*/" ] || break
-            REPO_ID="$(basename "$REPO_ID")"
+        if [ -d "$BORG_CACHE_DIR" ] && [ -n "$(find "$BORG_CACHE_DIR" -maxdepth 0 -not -empty)" ]; then
+            for REPO_ID in "$BORG_CACHE_DIR"/*/; do
+                REPO_ID="$(basename "$REPO_ID")"
 
-            REPO_LAST_LOCATION="$(cat "$BORG_SECURITY_DIR/$REPO_ID/location")"
-            REPO_LAST_USAGE="$(cat "$BORG_SECURITY_DIR/$REPO_ID/manifest-timestamp")"
+                if [ -z "${BORG_REPO_SECURITY[$REPO_ID]:-}" ]; then
+                    echo "Borg cache but no security info for Borg repo ${REPO_ID@Q} found" >&2
+                    RC=1
+                fi
+            done
+        fi
 
-            CACHE_SIZE=""
+        for REPO_ID in "${!BORG_REPO_SECURITY[@]}"; do
+            REPO_LAST_LOCATION="$(\cat "${BORG_REPO_SECURITY[$REPO_ID]}/location")"
+            REPO_LAST_USAGE="$(\cat "${BORG_REPO_SECURITY[$REPO_ID]}/manifest-timestamp")"
+
+            CACHE_SIZE="-"
             CACHE_LOCATION=""
             CACHE_TIMESTAMP=""
             if [ -d "$BORG_CACHE_DIR/$REPO_ID" ]; then
@@ -110,7 +124,7 @@ if [ -x "$(type -p borg)" ]; then
                 [ "$CACHE_TIMESTAMP" == "$REPO_LAST_USAGE" ] && CACHE_TIMESTAMP="" || RC=1
             fi
 
-            printf '%-68s%-28s%-8s%s\n' "$REPO_ID" "$REPO_LAST_USAGE" "$CACHE_SIZE" "$REPO_LAST_LOCATION"
+            printf '%-68s%-36s%-8s%s\n' "$REPO_ID" "$REPO_LAST_USAGE" "$CACHE_SIZE" "$REPO_LAST_LOCATION"
             [ -z "$CACHE_LOCATION" ] || { echo "Inconsistent location of Borg repo ${REPO_ID@Q}:" \
                 "Cache was last used at ${CACHE_LOCATION@Q}" >&2; RC=1; }
             [ -z "$CACHE_TIMESTAMP" ] || { echo "Inconsistent last usage of Borg repo ${REPO_ID@Q}:" \

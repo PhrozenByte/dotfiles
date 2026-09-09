@@ -63,7 +63,7 @@ urlencode() {
 # print usage
 if (( $# == 0 )); then
     echo "Usage:" >&2
-    echo "    $(basename "${BASH_SOURCE[0]}") [EXTENSION_UUID]..." >&2
+    echo "    $(basename "${BASH_SOURCE[0]}") EXTENSION_UUID..." >&2
     exit 1
 fi
 
@@ -168,7 +168,7 @@ for EXTENSION in "$@"; do
 
         if ! gnome-extensions list --active | grep -Fxq "$EXTENSION"; then
             # extension is installed, but inactive
-            # enable extension with `gnome-extensions install`
+            # enable extension with `gnome-extensions enable`
             echo "Enabling ${NAME@Q} v$VERSION ($EXTENSION)..."
             cmd gnome-extensions enable "$EXTENSION" \
                 || { echo "\`gnome-extensions enable\` failed with rc $?" >&2; EXIT_CODE=1; continue; }

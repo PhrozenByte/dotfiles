@@ -1,10 +1,10 @@
 {{ if not (lookPath "bat") }}
-/.config/bat
+.config/bat
 {{ end }}
 {{ if not (lookPath "git") }}
-/.gitconfig
+.gitconfig
 {{ end }}
 {{ if not (lookPath "vim") }}
-/.vimrc
-/.vim/
+.vimrc
+.vim/
 {{ end }}

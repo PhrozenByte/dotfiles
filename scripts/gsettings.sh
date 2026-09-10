@@ -89,7 +89,6 @@ export LC_ALL=C.UTF-8
 [ -x "$(type -p grep)" ] || { echo "Missing script dependency: grep" >&2; exit 1; }
 [ -x "$(type -p dconf)" ] || { echo "Missing script dependency: dconf" >&2; exit 1; }
 [ -x "$(type -p gsettings)" ] || { echo "Missing script dependency: gsettings" >&2; exit 1; }
-[ -x "$(type -p flatpak)" ] || { echo "Missing script dependency: flatpak" >&2; exit 1; }
 
 quote() {
     local QUOTED=
@@ -111,8 +110,16 @@ fi
 # prepare script
 EXIT_CODE=0
 
-readarray -t FLATPAKS < <(flatpak list --app --columns=application)
-readarray -t HOST_SCHEMAS < <(gsettings list-schemas)
+declare -a FLATPAKS=()
+if [ -x "$(type -p flatpak)" ]; then
+    readarray -t FLATPAKS < <(flatpak list --app --columns=application)
+fi
+
+readarray -t HOST_SCHEMAS < <(gsettings list-schemas 2>/dev/null)
+if (( ${#HOST_SCHEMAS[@]} == 0 )); then
+    echo "Failed to discover GSettings schemas: Is D-Bus running?" >&2
+    exit 1
+fi
 
 __report() {
     local INFO="$1"

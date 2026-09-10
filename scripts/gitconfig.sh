@@ -105,8 +105,9 @@ fi
 EXIT_CODE=0
 
 __git() {
-    cmd git "$@" \
-        || { echo "\`$(quote git "$@")\` failed with rc $?" >&2; EXIT_CODE=1; return 1; }
+    local RETURN_CODE=0
+    cmd git "$@" || RETURN_CODE=$?
+    (( RETURN_CODE == 0 )) || { echo "\`$(quote git "$@")\` failed with rc $RETURN_CODE" >&2; EXIT_CODE=1; return 1; }
 }
 
 __invalid_remote() {

@@ -290,8 +290,10 @@ for CONFIG_FILE in "$@"; do
                     && printf '[%s] %s %s (%s)\n' " " "$MIME" "$NEW_APP" "unchanged" \
                     || printf '[%s] %s %s -> %s (%s)\n' "#" "$MIME" "$OLD_APP" "$NEW_APP" "updated"; }
 
-            if ! xdg-mime default "$NEW_APP.desktop" "$MIME"; then
-                echo "\`$(quote default "$NEW_APP.desktop" "$MIME")\` failed with rc $?" >&2
+            MIME_RETURN_CODE=0
+            xdg-mime default "$NEW_APP.desktop" "$MIME" || MIME_RETURN_CODE=$?
+            if (( MIME_RETURN_CODE != 0 )); then
+                echo "\`$(quote default "$NEW_APP.desktop" "$MIME")\` failed with rc $MIME_RETURN_CODE" >&2
                 EXIT_CODE=1
                 continue
             fi

@@ -124,18 +124,16 @@ __report() {
 
 # dconf helper functions
 __dconf() {
-    if [ -n "$FLATPAK" ]; then
-        if ! flatpak run --command=dconf "$FLATPAK" "$@"; then
-            echo "\`$(quote flatpak run --command=dconf "$FLATPAK" "$@")\` failed with rc $?" >&2
-            EXIT_CODE=1
-            return 1
-        fi
-    else
-        if ! dconf "$@"; then
-            echo "\`$(quote dconf "$@")\` failed with rc $?" >&2
-            EXIT_CODE=1
-            return 1
-        fi
+    local CMD=( dconf "$@" )
+    [ -z "$FLATPAK" ] || CMD=( flatpak run --command=dconf "$FLATPAK" "$@" )
+
+    local RETURN_CODE=0
+    "${CMD[@]}" || RETURN_CODE=$?
+
+    if (( RETURN_CODE != 0 )); then
+        echo "\`$(quote "${CMD[@]}")\` failed with rc $RETURN_CODE" >&2
+        EXIT_CODE=1
+        return 1
     fi
 }
 
@@ -155,18 +153,16 @@ __dconf_invalid() {
 
 # gsettings helper functions
 __gsettings() {
-    if [ -n "$FLATPAK" ]; then
-        if ! flatpak run --command=gsettings "$FLATPAK" "$@"; then
-            echo "\`$(quote flatpak run --command=gsettings "$FLATPAK" "$@")\` failed with rc $?" >&2
-            EXIT_CODE=1
-            return 1
-        fi
-    else
-        if ! gsettings "$@"; then
-            echo "\`$(quote gsettings "$@")\` failed with rc $?" >&2
-            EXIT_CODE=1
-            return 1
-        fi
+    local CMD=( gsettings "$@" )
+    [ -z "$FLATPAK" ] || CMD=( flatpak run --command=gsettings "$FLATPAK" "$@" )
+
+    local RETURN_CODE=0
+    "${CMD[@]}" || RETURN_CODE=$?
+
+    if (( RETURN_CODE != 0 )); then
+        echo "\`$(quote "${CMD[@]}")\` failed with rc $RETURN_CODE" >&2
+        EXIT_CODE=1
+        return 1
     fi
 }
 

@@ -75,7 +75,7 @@ __curl_json() {
     RESPONSE="$(curl -sSf -L -H "Accept: application/json" "$@")"
     RETURN_CODE=$?
 
-    [ $RETURN_CODE -eq 0 ] || return $RETURN_CODE
+    (( RETURN_CODE == 0 )) || return $RETURN_CODE
 
     if ! jq -e '.' &>/dev/null <<<"$RESPONSE"; then
         echo "curl: (22) The requested URL '${@: -1}' returned a malformed JSON response" >&2
@@ -96,7 +96,7 @@ __latest_version() {
     RESPONSE="$(__curl_json "https://extensions.gnome.org/$(urlencode "/" api v1 extensions "$EXTENSION" versions)/?page=1&page_size=100")"
     RETURN_CODE=$?
 
-    [ $RETURN_CODE -eq 0 ] || return $RETURN_CODE
+    (( RETURN_CODE == 0 )) || return $RETURN_CODE
 
     # prepare results for pagination
     local RESULT NEXT NEXT_RESULT
@@ -106,7 +106,7 @@ __latest_version() {
     NEXT="$(jq -r '.next // empty' <<<"$RESPONSE")"
     while [ -n "$NEXT" ]; do
         NEXT_RESULT="$(__curl_json "$NEXT")"
-        [ $? -eq 0 ] || return 1
+        (( $? == 0 )) || return 1
 
         RESULT="$(jq -s 'add' <<<"$RESULT$(jq -c '.results // []' <<<"$NEXT_RESULT")")"
         NEXT="$(jq -r '.next // empty' <<<"$NEXT_RESULT")"
@@ -150,7 +150,7 @@ for EXTENSION in "$@"; do
 
         # install extension with `gnome-extensions install`
         cmd gnome-extensions install --force "$DOWNLOAD_DIR/$EXTENSION.zip" \
-            || { echo "\`gnome-extensions install\` failed with rc $?" >&2; EXIT_CODE=1; continue; }
+            || { RC=$?; echo "\`gnome-extensions install\` failed with rc $RC" >&2; EXIT_CODE=1; continue; }
 
         # alternative approach using the official DBus interface
         # however, this will quit prematurely and there's no way to wait for user confirmation

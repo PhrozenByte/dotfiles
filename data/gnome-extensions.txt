@@ -1,5 +1,4 @@
 caffeine@patapon.info
-dash-to-dock@micxgx.gmail.com
 lockkeys@vaina.lt
 nightthemeswitcher@romainvigier.fr
 notifications-alert-on-user-menu@hackedbellini.gmail.com

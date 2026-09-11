@@ -1,13 +1,16 @@
 {
     "dconf": [
-        { "path": "/org/gnome/shell/extensions/dash-to-dock/dock-fixed", "value": true },
         { "path": "/org/gnome/shell/extensions/dash-to-dock/dock-position", "value": "'LEFT'" },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/dock-fixed", "value": true },
         { "path": "/org/gnome/shell/extensions/dash-to-dock/extend-height", "value": true },
         { "path": "/org/gnome/shell/extensions/dash-to-dock/show-trash", "value": false },
         { "path": "/org/gnome/shell/extensions/dash-to-dock/show-mounts", "value": false },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/running-indicator-style", "value": "'DOTS'" },
         { "path": "/org/gnome/shell/extensions/dash-to-dock/scroll-action", "value": "'switch-workspace'" },
         { "path": "/org/gnome/shell/extensions/dash-to-dock/disable-overview-on-startup", "value": true },
-        { "path": "/org/gnome/shell/extensions/dash-to-dock/running-indicator-style", "value": "'DOTS'" },
-        { "path": "/org/gnome/shell/extensions/dash-to-dock/transparency-mode", "value": "'DYNAMIC'" }
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/custom-background-color", "value": true },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/background-color", "value": "'rgb(0,0,0)'" },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/background-opacity", "value": 1.0 },
+        { "path": "/org/gnome/shell/extensions/dash-to-dock/transparency-mode", "value": "'DEFAULT'" }
     ]
 }

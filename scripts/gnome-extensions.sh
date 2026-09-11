@@ -122,6 +122,13 @@ __latest_version() {
     ' <<<"$RESULT"
 }
 
+# list installed, active, and enabled extensions
+NEW_EXTENSIONS=()
+
+readarray -t EXTENSIONS < <(gnome-extensions list)
+readarray -t EXTENSIONS_ACTIVE < <(gnome-extensions list --active)
+readarray -t EXTENSIONS_ENABLED < <(gnome-extensions list --enabled)
+
 # get GNOME Shell version
 SHELL_VERSION="$(gnome-shell --version | grep -o '[0-9]\+\(\.[0-9]\+\)\+')"
 [ -n "$SHELL_VERSION" ] || { echo "Failed to determine GNOME Shell version" >&2; exit 1; }
@@ -131,7 +138,7 @@ DOWNLOAD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/gnome-extensions.XXXXXX")"
 quote + mkdir "$DOWNLOAD_DIR" >&2
 
 for EXTENSION in "$@"; do
-    if ! gnome-extensions list | grep -Fxq "$EXTENSION"; then
+    if ! printf '%s\n' "${EXTENSIONS[@]}" | grep -Fxq "$EXTENSION"; then
         # extension wasn't installed yet
         # fetch metadata about the requested extension from extensions.gnome.org
         INFO="$(__curl_json "https://extensions.gnome.org/$(urlencode "/" api v1 extensions "$EXTENSION")/")"
@@ -152,6 +159,10 @@ for EXTENSION in "$@"; do
         cmd gnome-extensions install --force "$DOWNLOAD_DIR/$EXTENSION.zip" \
             || { RC=$?; echo "\`gnome-extensions install\` failed with rc $RC" >&2; EXIT_CODE=1; continue; }
 
+        # we can't run `gnome-extensions enable` right away because GNOME deliberatly chose to remove that feature
+        # use `gsettings` to enable the extension, even though this will only take effect with the next login cycle
+        NEW_EXTENSIONS+=( "$EXTENSION" )
+
         # alternative approach using the official DBus interface
         # however, this will quit prematurely and there's no way to wait for user confirmation
         # thus it's basically impossible to batch install multiple extensions right after another
@@ -166,21 +177,40 @@ for EXTENSION in "$@"; do
         NAME="$(sed -ne 's/^  Name: \(.*\)$/\1/p' <<<"$INFO")"
         VERSION="$(sed -ne 's/^  Version: \(.*\)$/\1/p' <<<"$INFO")"
 
-        if ! gnome-extensions list --active | grep -Fxq "$EXTENSION"; then
+        if ! printf '%s\n' "${EXTENSIONS_ACTIVE[@]}" | grep -Fxq "$EXTENSION"; then
             # extension is installed, but inactive
             # enable extension with `gnome-extensions enable`
             echo "Enabling ${NAME@Q} v$VERSION ($EXTENSION)..."
             cmd gnome-extensions enable "$EXTENSION" \
                 || { echo "\`gnome-extensions enable\` failed with rc $?" >&2; EXIT_CODE=1; continue; }
         else
-            # extension is installed and enabled
+            # extension is installed and active
             # nothing to do here...
-            echo "Skipping already enabled ${NAME@Q} v$VERSION ($EXTENSION)..."
+            echo "Skipping already active ${NAME@Q} v$VERSION ($EXTENSION)..."
         fi
     fi
 done
 
 # delete download folder
 cmd rm -r "$DOWNLOAD_DIR"
+
+# enable newly installed extensions with `gsettings`
+if (( ${#NEW_EXTENSIONS[@]} > 0 )); then
+    if ! gsettings list-schemas 2>/dev/null | grep -Fxq "org.gnome.shell"; then
+        echo "Failed to discover GNOME Shell GSettings schema: Is D-Bus running?" >&2
+        exit 1
+    fi
+
+    echo "Enabling newly installed extensions with \`gsettings\`..."
+    echo "IMPORTANT: You need to logout and login again for the extensions to load!"
+
+    readarray -t EXTENSIONS_ENABLED < <(
+        printf '%s\n' "${EXTENSIONS_ENABLED[@]}" "${NEW_EXTENSIONS[@]}" | sort -u
+    )
+
+    GVARIANT="$(printf "'%s', " "${EXTENSIONS_ENABLED[@]}")"
+    GVARIANT="[${GVARIANT%, }]"
+    cmd gsettings set "org.gnome.shell" "enabled-extensions" "$GVARIANT"
+fi
 
 exit $EXIT_CODE

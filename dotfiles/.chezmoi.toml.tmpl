@@ -4,6 +4,9 @@
 {{- else -}}
     {{- if promptBoolOnce . "_" "Include default 'gitconfig.json' file" true -}}
         {{- $gitconfig_files = append $gitconfig_files "./data/gitconfig.json" -}}
+        {{- if stat (joinPath .chezmoi.sourceDir ".." "data" (printf "gitconfig_%s.json" .chezmoi.osRelease.id)) -}}
+            {{- $gitconfig_files = append $gitconfig_files (printf "./data/gitconfig_%s.json" .chezmoi.osRelease.id) -}}
+        {{- end -}}
     {{- end -}}
     {{- if $gitconfig_extra := promptStringOnce . "_" "Include additional 'gitconfig.json' file" "" -}}
         {{- $gitconfig_files = append $gitconfig_files $gitconfig_extra -}}
@@ -16,8 +19,8 @@
 {{- else -}}
     {{- if promptBoolOnce . "_" "Include default 'gsettings.json' file" true -}}
         {{- $gsettings_files = append $gsettings_files "./data/gsettings.json" -}}
-        {{- if and (eq .chezmoi.os "linux") (eq .chezmoi.osRelease.id "ubuntu") -}}
-            {{- $gsettings_files = append $gsettings_files "./data/gsettings_ubuntu.json" -}}
+        {{- if stat (joinPath .chezmoi.sourceDir ".." "data" (printf "gsettings_%s.json" .chezmoi.osRelease.id)) -}}
+            {{- $gsettings_files = append $gsettings_files (printf "./data/gsettings_%s.json" .chezmoi.osRelease.id) -}}
         {{- end -}}
     {{- end -}}
     {{- if $gsettings_extra := promptStringOnce . "_" "Include additional 'gsettings.json' file" "" -}}
@@ -31,6 +34,9 @@
 {{- else -}}
     {{- if promptBoolOnce . "_" "Include default 'gnome-extensions.txt' file" true -}}
         {{- $gnome_extensions_files = append $gnome_extensions_files "./data/gnome-extensions.txt" -}}
+        {{- if stat (joinPath .chezmoi.sourceDir ".." "data" (printf "gnome-extensions_%s.txt" .chezmoi.osRelease.id)) -}}
+            {{- $gnome_extensions_files = append $gnome_extensions_files (printf "./data/gnome-extensions_%s.txt" .chezmoi.osRelease.id) -}}
+        {{- end -}}
     {{- end -}}
     {{- if $gnome_extensions_extra := promptStringOnce . "_" "Include additional 'gnome-extensions.txt' file" "" -}}
         {{- $gnome_extensions_files = append $gnome_extensions_files $gnome_extensions_extra -}}
@@ -43,6 +49,9 @@
 {{- else -}}
     {{- if promptBoolOnce . "_" "Include default 'mimetypes.json' file" true -}}
         {{- $mimetypes_files = append $mimetypes_files "./data/mimetypes.json" -}}
+        {{- if stat (joinPath .chezmoi.sourceDir ".." "data" (printf "mimetypes_%s.json" .chezmoi.osRelease.id)) -}}
+            {{- $mimetypes_files = append $mimetypes_files (printf "./data/mimetypes_%s.json" .chezmoi.osRelease.id) -}}
+        {{- end -}}
     {{- end -}}
     {{- if $mimetypes_extra := promptStringOnce . "_" "Include additional 'mimetypes.json' file" "" -}}
         {{- $mimetypes_files = append $mimetypes_files $mimetypes_extra -}}

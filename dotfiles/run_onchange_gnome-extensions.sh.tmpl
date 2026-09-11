@@ -36,11 +36,14 @@ DATA_FILES=(
 
 (( ${#DATA_FILES[@]} > 0 )) || { echo "Skipping Chezmoi hook: No data files are configured" >&2; exit 0; }
 
+EXIT_CODE=0
 for DATA_FILE in "${DATA_FILES[@]}"; do
     readarray -t EXTENSIONS <"$DATA_FILE"
 
     if (( ${#EXTENSIONS[@]} > 0 )); then
         quote + "$SCRIPT" "${EXTENSIONS[@]}" >&2
-        "$SCRIPT" "${EXTENSIONS[@]}" ||:
+        "$SCRIPT" "${EXTENSIONS[@]}" || EXIT_CODE=1
     fi
 done
+
+exit $EXIT_CODE

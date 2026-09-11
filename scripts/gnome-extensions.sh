@@ -196,12 +196,13 @@ cmd rm -r "$DOWNLOAD_DIR"
 
 # enable newly installed extensions with `gsettings`
 if (( ${#NEW_EXTENSIONS[@]} > 0 )); then
+    echo "Enabling newly installed extensions with \`gsettings\`..."
+
     if ! gsettings list-schemas 2>/dev/null | grep -Fxq "org.gnome.shell"; then
         echo "Failed to discover GNOME Shell GSettings schema: Is D-Bus running?" >&2
         exit 1
     fi
 
-    echo "Enabling newly installed extensions with \`gsettings\`..."
     echo "IMPORTANT: You need to logout and login again for the extensions to load!"
 
     readarray -t EXTENSIONS_ENABLED < <(

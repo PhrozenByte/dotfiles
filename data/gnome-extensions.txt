@@ -1,4 +1,7 @@
+caffeine@patapon.info
+dash-to-dock@micxgx.gmail.com
+lockkeys@vaina.lt
 nightthemeswitcher@romainvigier.fr
-scroll-workspaces@gfxmonk.net
 notifications-alert-on-user-menu@hackedbellini.gmail.com
 steal-my-focus-window@steal-my-focus-window
+scroll-workspaces@gfxmonk.net

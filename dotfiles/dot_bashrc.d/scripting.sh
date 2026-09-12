@@ -15,6 +15,23 @@ cmd() {
     "$@"
 }
 
+# print and run a command and write its stdout to a file
+cput() {
+    local APPEND=
+    [ "$1" != "-a" ] || { APPEND="y"; shift; }
+
+    local FILE="$1"
+    shift
+
+    if [ "$APPEND" == "y" ]; then
+        echo + "$(quote "$@") >> $(quote "$FILE")" >&2
+        "$@" >> "$FILE"
+    else
+        echo + "$(quote "$@") > $(quote "$FILE")" >&2
+        "$@" > "$FILE"
+    fi
+}
+
 # manage bitwise flags
 has_flag() {
     local VALUE="$1" FLAG="$2"

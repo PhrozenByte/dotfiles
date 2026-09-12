@@ -28,6 +28,13 @@
 # `"pathPlaceholder"` object, which must contain `"schema"` and `"key"` keys,
 # using the same semantics as described above.
 #
+# Both `"dconf"` and `"gsettings"` objects can optionally give the boolean
+# `"default_only"` key. If `true`, the script first checks whether a custom
+# value has already been set. If the user has previously modified the setting,
+# either manually or through a prior run of this script, the value won't be
+# changed. Since this check requires `dconf`, `"default_only"` only works
+# with few Flatpaks.
+#
 # Example JSON file:
 #
 #     ```json
@@ -36,6 +43,7 @@
 #             {
 #                 "schema": "org.gnome.desktop.interface",
 #                 "key": "gtk-enable-primary-paste",
+#                 "default_only": true,
 #                 "value": true
 #             },
 #             {
@@ -124,9 +132,11 @@ fi
 __report() {
     local INFO="$1"
     [ -z "$FLATPAK" ] || INFO+=" (Flatpak $FLATPAK)"
-    [ "$2" == "$3" ] \
-        && printf '[%s] %s %s (unchanged)\n' " " "$INFO" "$3" \
-        || printf '[%s] %s %s -> %s (updated)\n' "#" "$INFO" "$2" "$3"
+    [ "$2" != "$3" ] \
+        && printf '[%s] %s %s -> %s (updated)\n' "#" "$INFO" "$2" "$3" \
+        || { [ -n "$4" ] \
+            && printf '[%s] %s %s (keeping non-default value)\n' " " "$INFO" "$3" \
+            || printf '[%s] %s %s (unchanged)\n' " " "$INFO" "$3"; }
 }
 
 # dconf helper functions
@@ -216,18 +226,25 @@ for CONFIG_FILE in "$@"; do
         # read current value
         OLD_VALUE="$(__dconf_read "$SCHEMA_PATH")"
 
-        # write given value, or reset to default value otherwise
-        if jq -e '.value != null' <<<"$ENTRY" >/dev/null; then
-            VALUE="$(jq -r '.value' <<<"$ENTRY")"
-            __dconf write "$SCHEMA_PATH" "$VALUE" \
-                || continue
-        else
-            __dconf reset "$SCHEMA_PATH" \
-                || continue
+        # check whether to only update a default value
+        # `dconf read` simply returns nothing when no value was written before
+        DEFAULT_ONLY="$(jq -r '.default_only == true // empty' <<<"$ENTRY")"
+        if [ -z "$DEFAULT_ONLY" ] || [ -z "$OLD_VALUE" ]; then
+            DEFAULT_ONLY=""
+
+            # write given value, or reset to default value otherwise
+            if jq -e '.value != null' <<<"$ENTRY" >/dev/null; then
+                VALUE="$(jq -r '.value' <<<"$ENTRY")"
+                __dconf write "$SCHEMA_PATH" "$VALUE" \
+                    || continue
+            else
+                __dconf reset "$SCHEMA_PATH" \
+                    || continue
+            fi
         fi
 
         # report whether the value was changed
-        __report "$SCHEMA_PATH" "$OLD_VALUE" "$(__dconf_read "$SCHEMA_PATH")"
+        __report "$SCHEMA_PATH" "$OLD_VALUE" "$(__dconf_read "$SCHEMA_PATH")" "$DEFAULT_ONLY"
     done < <(jq -c '.dconf[]?' "$CONFIG_FILE")
 
     # parse gsettings
@@ -289,6 +306,9 @@ for CONFIG_FILE in "$@"; do
         KEY="$(jq -r '.key // empty' <<<"$ENTRY")"
         [ -n "$KEY" ] || { __gsettings_invalid "$CONFIG_FILE" "$INDEX" "No key given"; continue; }
 
+        # check whether to only update a default value
+        DEFAULT_ONLY="$(jq -r '.default_only == true // empty' <<<"$ENTRY")"
+
         # read optional value; then either set given value, or reset to default value
         VALUE="$(jq -r '.value' <<<"$ENTRY")"
         VALUE_RESET="$(jq '.value == null // empty' <<<"$ENTRY")"
@@ -297,17 +317,23 @@ for CONFIG_FILE in "$@"; do
             # read current value
             OLD_VALUE="$(__gsettings_get "$SCHEMA_PATH" "$KEY")"
 
-            # set given value, or reset to default value otherwise
-            if [ -z "$VALUE_RESET" ]; then
-                __gsettings set "$SCHEMA_PATH" "$KEY" "$VALUE" \
-                    || continue
-            else
-                __gsettings reset "$SCHEMA_PATH" "$KEY" \
-                    || continue
+            # if requested to only update a default value, check the path with `dconf read` first
+            # `dconf read` simply returns nothing when no custom value was set before
+            if [ -z "$DEFAULT_ONLY" ] || [ -z "$(__dconf_read "/${SCHEMA_PATH//\./\/}/$KEY")" ]; then
+                DEFAULT_ONLY=""
+
+                # set given value, or reset to default value otherwise
+                if [ -z "$VALUE_RESET" ]; then
+                    __gsettings set "$SCHEMA_PATH" "$KEY" "$VALUE" \
+                        || continue
+                else
+                    __gsettings reset "$SCHEMA_PATH" "$KEY" \
+                        || continue
+                fi
             fi
 
             # report whether the value was changed
-            __report "$SCHEMA_PATH $KEY" "$OLD_VALUE" "$(__gsettings_get "$SCHEMA_PATH" "$KEY")"
+            __report "$SCHEMA_PATH $KEY" "$OLD_VALUE" "$(__gsettings_get "$SCHEMA_PATH" "$KEY")" "$DEFAULT_ONLY"
         done
     done < <(jq -c '.gsettings[]?' "$CONFIG_FILE")
 done

@@ -2,7 +2,8 @@
     "gsettings": [
         { "schema": "org.gnome.desktop.interface", "key": "gtk-enable-primary-paste", "value": true },
 
-        { "schema": "org.gnome.shell", "key": "favorite-apps", "value": "['org.mozilla.firefox.desktop', 'firefox.desktop', 'app.devsuite.Ptyxis.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop', 'org.gnome.Nautilus.desktop']" },
+        { "schema": "org.gnome.shell", "key": "favorite-apps", "default_only": true,
+            "value": "['org.mozilla.firefox.desktop', 'firefox.desktop', 'app.devsuite.Ptyxis.desktop', 'org.gnome.Ptyxis.desktop', 'org.gnome.TextEditor.desktop', 'org.gnome.Nautilus.desktop']" },
 
         { "schema": "org.gnome.desktop.calendar", "key": "show-weekdate", "value": true },
         { "schema": "org.gnome.desktop.interface", "key": "clock-show-weekday", "value": true },
